@@ -441,7 +441,7 @@ L4192:
         jmp     (GORESTART+1)
 .endif
 
-  .if .def(CONFIG_RAM) || .def(OSI)
+  .if (!.def(CONFIG_OSI_NOMATHMSG)) && (.def(CONFIG_RAM) || .def(OSI))
 ; OSI is compiled for ROM, but includes
 ; this unused string
 QT_WANT:
@@ -487,6 +487,9 @@ QT_BYTES_FREE:
 QT_BASIC:
   .ifdef OSI
         .byte   "OSI 6502 BASIC VERSION 1.0 REV 3.2"
+  .endif
+  .ifdef CONFIG_OSI_UP5K
+        .byte   "-UP5K"
   .endif
   .ifdef KIM
         .byte   "MOS TECH 6502 BASIC V1.1"

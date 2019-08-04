@@ -196,7 +196,7 @@ FINDHIGHESTSTRING:
         sta     FRETOP+1
         ldy     #$00
         sty     FNCNAM+1
-.ifdef CONFIG_2
+.if (.def(CONFIG_2) || .def(CONFIG_OSI_GCBUGFUX))
         sty     FNCNAM	; GC bugfix!
 .endif
         lda     STREND
@@ -204,9 +204,15 @@ FINDHIGHESTSTRING:
         sta     LOWTR
         stx     LOWTR+1
         lda     #TEMPST
+.ifdef CONFIG_OSI_GCBUGFUX
+        sta     INDEX
+        sty     INDEX+1
+.else
         ldx     #$00
         sta     INDEX
         stx     INDEX+1
+.endif
+
 L333D:
         cmp     TEMPPT
         beq     L3346
@@ -230,7 +236,11 @@ L335A:
 L335F:
         sta     HIGHDS
         stx     HIGHDS+1
+.ifdef CONFIG_OSI_GCBUGFUX
+        lda     #$04	; OSI GC bugfix - Yes, please
+.else
         lda     #$03	; OSI GC bugfix -> $04 ???
+.endif
         sta     DSCLEN
 L3367:
         lda     HIGHDS
@@ -239,8 +249,12 @@ L336B:
         cpx     STREND+1
         bne     L3376
         cmp     STREND
+.ifdef CONFIG_OSI_GCBUGFUX        
+        beq     MOVE_HIGHEST_STRING_TO_TOP
+.else
         bne     L3376
         jmp     MOVE_HIGHEST_STRING_TO_TOP
+.endif
 L3376:
         sta     INDEX
         stx     INDEX+1
@@ -273,7 +287,7 @@ L3376:
 .ifdef CONFIG_CBM1_PATCHES
         jsr     LE7F3 ; XXX patch, call into screen editor
 .else
-  .ifdef CONFIG_11
+  .if (.def(CONFIG_11) || .def(CONFIG_OSI_GCBUGFUX))
         ldy     #$00	; GC bugfix
   .endif
         asl     a
@@ -336,8 +350,14 @@ L33DF:
         ldx     INDEX+1
         sta     FNCNAM
         stx     FNCNAM+1
+.ifdef CONFIG_OSI_GCBUGFUX
+        dey
+        dey
+        sty     Z52
+.else
         lda     DSCLEN
         sta     Z52
+.endif
 
 ; ----------------------------------------------------------------------------
 ; ADD (DSCLEN) TO PNTR IN INDEX
@@ -360,22 +380,31 @@ L33FA:
 ; TO TOP AND GO BACK FOR ANOTHER
 ; ----------------------------------------------------------------------------
 MOVE_HIGHEST_STRING_TO_TOP:
-.ifdef CONFIG_2
+.ifdef CONFIG_OSI_GCBUGFUX
+        dec     DSCLEN
         lda     FNCNAM+1	; GC bugfix
         ora     FNCNAM
+        beq     L33FA
+        ldy     Z52
+        clc
 .else
+  .ifdef CONFIG_2
+        lda     FNCNAM+1	; GC bugfix
+        ora     FNCNAM
+  .else
         ldx     FNCNAM+1
-.endif
+  .endif
         beq     L33FA
         lda     Z52
-.ifndef CONFIG_10A
+  .ifndef CONFIG_10A
         sbc     #$03
-.else
+  .else
         and     #$04
-.endif
+  .endif
         lsr     a
         tay
         sta     Z52
+.endif
         lda     (FNCNAM),y
         adc     LOWTR
         sta     HIGHTR
@@ -397,7 +426,9 @@ MOVE_HIGHEST_STRING_TO_TOP:
         iny
         sta     (FNCNAM),y
         jmp     FINDHIGHESTSTRING
-
+.ifdef CONFIG_OSI_GCBUGFUX
+        .byte   $FF,$FF
+.endif
 ; ----------------------------------------------------------------------------
 ; CONCATENATE TWO STRINGS
 ; ----------------------------------------------------------------------------

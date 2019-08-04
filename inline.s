@@ -61,33 +61,44 @@ INLINAIM:
         cmp     #$0D
         beq     L2453
     .ifndef CONFIG_NO_LINE_EDITING
-        cmp     #$20
-      .ifdef AIM65
-        bcc     L244E
-      .else
+      .ifdef CONFIG_OSI_BACKSP
+        cmp     #$08  ; BS
+        beq     L2420
+        cmp     #$1B  ; ESC
+        beq     ESCLN
+        cmp     #$20  ; ' '
         bcc     INLIN2
-      .endif
-      .ifdef MICROTAN
-        cmp     #$80
+        cmp     #$7F  ; DEL
+        bcs     INLIN2
       .else
+        cmp     #$20
         .ifdef AIM65
+        bcc     L244E
+        .else
+        bcc     INLIN2
+        .endif
+        .ifdef MICROTAN
+        cmp     #$80
+        .else
+          .ifdef AIM65
         cmp     #$7F
         beq     L2420
-        .endif
+          .endif
         cmp     #$7D
-      .endif
+        .endif
         bcs     INLIN2
         cmp     #$40 ; @
-      .ifdef AIM65
+        .ifdef AIM65
         beq     LB35F
-      .else
+        .else
         beq     L2423
-      .ifdef MICROTAN
+         .ifdef MICROTAN
         cmp     #$7F ; DEL
-      .else
+         .else
         cmp     #$5F ; _
-      .endif
+         .endif
         beq     L2420
+        .endif
       .endif
 L2443:
       .ifdef MICROTAN
@@ -117,16 +128,30 @@ L2453:
 .endif
 
 .ifndef KBD
-  .ifndef APPLE
+  .ifdef CONFIG_OSI_BACKSP
 GETLN:
-    .ifdef CONFIG_FILE
+        jsr     MONRDKEY
+        and     #$7F
+        rts
+
+ESCLN:
+        lda     #$5C  ; '\
+        bne     L2423
+; pad
+        .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+        .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+        .byte $FF,$FF,$FF,$FF,$FF,$FF
+  .else
+    .ifndef APPLE
+GETLN:
+      .ifdef CONFIG_FILE
         jsr     CHRIN
         ldy     CURDVC
         bne     L2465
-    .else
+      .else
         jsr     MONRDKEY
-    .endif
-    .ifdef OSI
+      .endif
+      .ifdef OSI
         nop
         nop
         nop
@@ -142,18 +167,18 @@ GETLN:
         nop
         nop
         and     #$7F
+      .endif
     .endif
-  .endif
-  .ifdef APPLE
+    .ifdef APPLE
 RDKEY:
         jsr     LFD0C
         and     #$7F
-  .endif
-    .ifdef SYM1
-        cmp     #$14
-    .else
-        cmp     #$0F
     .endif
+      .ifdef SYM1
+        cmp     #$14
+      .else
+        cmp     #$0F
+      .endif
         bne     L2465
         pha
         lda     Z14
@@ -162,4 +187,5 @@ RDKEY:
         pla
 L2465:
         rts
+  .endif
 .endif

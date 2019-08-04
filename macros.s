@@ -65,7 +65,11 @@ ERROR_MESSAGES:
 .macro define_error error, msg
         .segment "ERROR"
 		error := <(*-ERROR_MESSAGES)
+	.ifndef CONFIG_OSI_ERRMSGFIX
 		htasc msg
+	.else
+		.byte msg
+	.endif
 .endmacro
 
 ;---------------------------------------------

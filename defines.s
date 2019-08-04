@@ -4,6 +4,9 @@ CBM1 := 1
 .elseif .def(osi)
 OSI := 1
 .include "defines_osi.s"
+.elseif .def(osi_up5k)
+OSI := 1
+.include "defines_osi_up5k.s"
 .elseif .def(applesoft)
 APPLE := 1
 .include "defines_apple.s"
