@@ -259,6 +259,12 @@ L40D7:
         cmp     #$A0
         beq     L40FA
 .endif
+.if .def(ROSCO)
+; ROSCO: hard RAM top limit is $C000
+        lda     LINNUM+1
+        cmp     #$C0
+        beq     L40FA
+.endif
 L40DD:
 .ifdef CONFIG_2
         lda     #$55 ; 01010101 / 10101010
@@ -492,7 +498,7 @@ QT_BASIC:
         .byte   "-UP5K"
   .endif
   .ifdef ROSCO
-        .byte   "*** ROSCO_6502 BASIC ***"
+        .byte   "ROSCO_6502 BASIC"
   .endif
   .ifdef KIM
         .byte   "MOS TECH 6502 BASIC V1.1"

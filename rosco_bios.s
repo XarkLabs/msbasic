@@ -83,10 +83,10 @@ BANK_ROM_SZ = $2000         ; 8K ROM bank size
 ;*****************
 
 ; bios system globals
-BANKS       = $200          ; mirror of BANK_SET
+BANKS       = $200          ; mirror of BANK_SET register
 TICKCNT     = $201          ; tick counter (high bit is LED off/on)
 
-BLINKCOUNT  = 50            ; ~100Hz interrupts between LED toggles
+BLINKCOUNT  = 50            ; # of ~100Hz interrupts between LED toggles
 
 ; rosco_6502 reset/init
 
@@ -159,25 +159,11 @@ ROSCO_RESET:
                 bra     @banner_loop    ; and continue
 @banner_done:
 
-@echo_test:
-                jsr     CHRIN
-                bcc     @echo_test
-                cmp     #'X'
-                bne     @echo_test
-
                 jmp     COLD_START
 
 ROSCO_BANNER:
-.if 0
                 .byte   $D, $A, $1B, "[1;33m"
-                .byte   "                           ___ ___ ___ ___ ", $D, $A
-                .byte   " ___ ___ ___ ___ ___      |  _| __|   |__ |", $D, $A
-                .byte   "|  _| . |_ -|  _| . |     | . |__ | | | __|", $D, $A
-                .byte   "|_| |___|___|___|___|_____|___|___|___|___|", $D, $A
-                .byte   "                    |_____|", $1B, "[1;37m BASIC ", $1B, "[1;30m0.01.DEV", $1B, "[0m", $D, $A, $D, $A, 0
-.else
-                .byte   $D,$A, "Rosco_6502 - echo test, X for BASIC", $D, $A, 0
-.endif
+                .byte   "rosco_6502", $1B, "[1;37m 8K MS BASIC ", $1B, "[1;30m0.01.DEV", $1B, "[0m", $D, $A, 0
 
 ; *******************************************************
 ; Timer tick IRQ handler; Driven by DUART timer
@@ -230,14 +216,12 @@ SAVE:
 MONRDKEY:
 CHRIN:
                 lda     DUA_SRA         ; read DUART status
-                and     #$01            ; is RXRDY set (Bit 1 of DUART SRA)?
-                beq     @no_keypressed  ; branch no char ready.
+                ror            ; is RXRDY set (Bit 1 of DUART SRA)?
+                bcc     @no_keypressed  ; branch no char ready.
                 lda     DUA_RBA         ; load character. 
                 jsr     CHROUT		; echo
                 sec                     ; indicate character read
-                rts
 @no_keypressed:
-                clc                     ; indicate no character read
                 rts
 
 ; Output a character (from the A register) to the serial interface.
