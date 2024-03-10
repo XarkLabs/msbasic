@@ -98,7 +98,7 @@ INLINAIM:
         cmp     #$5F ; _
          .endif
         beq     L2420
-        .endif
+    .endif
       .endif
 L2443:
       .ifdef MICROTAN

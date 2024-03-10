@@ -11,3 +11,9 @@
 .ifdef SYM1
         jmp     PR_WRITTEN_BY
 .endif
+.ifdef EATER
+        jmp COLD_START
+.endif
+.ifdef ROSCO
+        jmp COLD_START
+.endif
