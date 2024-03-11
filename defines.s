@@ -28,6 +28,12 @@ AIM65 := 1
 .elseif .def(sym1)
 SYM1 := 1
 .include "defines_sym1.s"
+.elseif .def(eater)
+EATER := 1
+.include "defines_eater.s"
+.elseif .def(rosco)
+ROSCO := 1
+.include "defines_rosco.s"
 .endif
 
 .ifdef CONFIG_2C

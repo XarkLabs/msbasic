@@ -259,6 +259,12 @@ L40D7:
         cmp     #$A0
         beq     L40FA
 .endif
+.if .def(ROSCO)
+; ROSCO: hard RAM top limit is $C000
+        lda     LINNUM+1
+        cmp     #$C0
+        beq     L40FA
+.endif
 L40DD:
 .ifdef CONFIG_2
         lda     #$55 ; 01010101 / 10101010
@@ -441,7 +447,7 @@ L4192:
         jmp     (GORESTART+1)
 .endif
 
-  .if (!.def(CONFIG_OSI_NOMATHMSG)) && (.def(CONFIG_RAM) || .def(OSI))
+  .if (!.def(CONFIG_OSI_NOMATHMSG)) && (.def(CONFIG_RAM) || .def(OSI)|| .def(ROSCO))
 ; OSI is compiled for ROM, but includes
 ; this unused string
 QT_WANT:
@@ -490,6 +496,9 @@ QT_BASIC:
   .endif
   .ifdef CONFIG_OSI_UP5K
         .byte   "-UP5K"
+  .endif
+  .ifdef ROSCO
+        .byte   "ROSCO_6502 BASIC"
   .endif
   .ifdef KIM
         .byte   "MOS TECH 6502 BASIC V1.1"

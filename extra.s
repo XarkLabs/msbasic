@@ -27,3 +27,11 @@
 .ifdef SYM1
         .byte   0,0,0
 .endif
+
+.ifdef EATER
+.include "eater_bios.s"
+.endif
+
+.ifdef ROSCO
+.include "rosco_bios.s"
+.endif
